@@ -48,7 +48,8 @@ def main():
 	banner()
 	print(Fore.YELLOW + """
      [1]. Partage     [2]. Réception     [3]. Compression
-     [4]. Historique  [5]. Aide          [0]. Quitter 
+     [4]. Tunnels     [5]. Région        [6]. AuthToken
+     [7]. Historique  [8]. Aide          [0]. Quitter 
 		""")
 	menu = input(Fore.WHITE + """
 	  Entrez un numéro : """)
@@ -61,6 +62,9 @@ def main():
 		elif menu == "2":
 			clear()
 			receive()
+		elif menu == "4":
+			clear()
+			tunnels()
 		else:
 			print(Fore.GREEN + """
 	  Nombre invalide
@@ -77,13 +81,13 @@ def send():
 	s = socket.socket()
 	s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 	url = str(ngrok.connect(8080).public_url)
-	url = url.replace("http://","")
+	#url = url.replace("http://","")
 	host = '0.0.0.0'
 	port = 8080
 	s.bind((host,port))
 	s.listen(1)
 	print(Fore.YELLOW + f"""
-	   Votre pc : {url}
+	   Votre url de partage : {url}
 	    Est en attente de connexion d'un récepteur...""")
 	conn, addr = s.accept()
 	print(Fore.GREEN + f"""
@@ -111,18 +115,20 @@ def receive():
 	banner()
 	s = socket.socket()
 	s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-	host = input(Fore.WHITE + """
-	  Entrez le nom de l'envoyeur : """)
+	host = input(Fore.WHITE + str("""
+	  Entrez l'url de partage de l'envoyeur : """))
 	port = 8080
 	s.connect((host,port))
 	print(Fore.GREEN + f"""
 	   Vous êtes connecté à {host}...""")
-	filename = "receveid_txt.txt"
+	ext = input(Fore.WHITE + str("""
+	  Entrez l'extension du fichier : """))
+	filename = str(f"download.{ext}")
 	file = open(filename, "wb")
 	file_data = s.recv(1024)
 	if len(file_data) == 0:
 		print(Fore.RED + """
-       L'envoyeur s'est déconnecté...
+	   L'envoyeur s'est déconnecté...
     	""")
 		file.close()
 		os.remove(filename)
@@ -134,6 +140,14 @@ def receive():
 		print(Fore.GREEN + f"""
 	   Fichier {filename} reçu avec succès
 	  	""")
+
+def tunnels():
+	global module_name
+	module_name = "Liste des tunnels actifs (Ngrok)"
+	banner()
+	print(Fore.GREEN + f"""
+	   {ngrok.get_ngrok_process()}
+	""")
 
 def coming():
 	print(Fore.GREEN + """
