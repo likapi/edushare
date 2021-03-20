@@ -1,10 +1,11 @@
 #!/usr/bin/python3
-import colorama, datetime, pyfiglet, socket, os, random
+import colorama, datetime, pyfiglet, socket, os
 from os import system, name
 from sys import platform as _platform
 from time import sleep
 from pyfiglet import Figlet
 from colorama import Fore, Back, Style
+from pyngrok import ngrok
 
 #config
 colorama.init() #colorama init
@@ -69,17 +70,20 @@ def main():
 			main()
 			
 def send():
+	ngrok.get_ngrok_process().stop_monitor_thread()
 	global module_name
 	module_name = "Partage de fichiers (Socket)"
 	banner()
 	s = socket.socket()
 	s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-	host = socket.gethostname()
+	url = str(ngrok.connect(8080).public_url)
+	url = url.replace("http://","")
+	host = '0.0.0.0'
 	port = 8080
 	s.bind((host,port))
-	s.listen(2)
+	s.listen(1)
 	print(Fore.YELLOW + f"""
-	   Votre pc : {host}
+	   Votre pc : {url}
 	    Est en attente de connexion d'un récepteur...""")
 	conn, addr = s.accept()
 	print(Fore.GREEN + f"""
