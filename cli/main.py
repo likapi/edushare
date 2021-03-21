@@ -120,9 +120,10 @@ def send():
 	port = 8080
 	s.bind((host,port))
 	s.listen(1)
-	public_url = ngrok.connect(port, "tcp", options={"remote_addr": "{}:{}".format(host, port)})
+	url = ngrok.connect(port, "tcp").public_url
+	url = str(url).replace("tcp://", "")
 	print(Fore.YELLOW + f"""
-	   Votre url de partage : {public_url}
+	   Votre url de partage : {url}
 	    Est en attente de connexion d'un récepteur...""")
 	while True:
 		conn, addr = s.accept()
@@ -155,6 +156,10 @@ def receive():
 	host = input(Fore.WHITE + str("""
 	  Entrez l'url de partage de l'envoyeur : """))
 	port = 8080
+	if ":" in host:
+		ngrok = host.split(":")
+		host = str(ngrok[0])
+		port = int(ngrok[1])
 	s.connect((host,port))
 	print(Fore.GREEN + f"""
 	   Vous êtes connecté à {host}...""")
