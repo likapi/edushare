@@ -1,16 +1,32 @@
 #!/usr/bin/python3
-import colorama, datetime, pyfiglet, socket, os
+import colorama, datetime, pyfiglet, socket, os, zipfile
 from os import system, name
 from sys import platform as _platform
 from time import sleep
 from pyfiglet import Figlet
 from colorama import Fore, Back, Style
-from pyngrok import ngrok
+from pyngrok import ngrok, conf
 
 #config
 colorama.init() #colorama init
 font = Figlet(font='graffiti') #pyfiglet font
 now = datetime.datetime.now() #datetime get time
+#ngrok conf persistent
+try:
+	with open("lang.txt"):
+		regconf = open("lang.txt", "r")
+		conf.get_default().region = regconf.read()
+		regconf.close()
+except IOError:
+	conf.get_default().region = None #ngrok default region
+
+try:
+	with open("token.txt"):
+		authconf = open("token.txt", "r")
+		conf.get_default().auth_token = authconf.read()
+		authconf.close()
+except IOError:
+	conf.get_default().auth_token = None #ngrok default authtoken
 
 def sys():
 	if _platform == "linux" or _platform == "linux2":
@@ -51,8 +67,8 @@ def main():
      [4]. Tunnels     [5]. Région        [6]. AuthToken
      [7]. Historique  [8]. Aide          [0]. Quitter 
 		""")
-	menu = input(Fore.WHITE + """
-	  Entrez un numéro : """)
+	menu = input(Fore.WHITE + str("""
+	  Entrez un numéro : """))
 	if menu != "":
 		if menu == "0":
 			close()
@@ -62,9 +78,18 @@ def main():
 		elif menu == "2":
 			clear()
 			receive()
+		elif menu == "3":
+			clear()
+			compress()
 		elif menu == "4":
 			clear()
 			tunnels()
+		elif menu == "5":
+			clear()
+			region()
+		elif menu == "6":
+			clear()
+			authtoken()
 		else:
 			print(Fore.GREEN + """
 	  Nombre invalide
@@ -78,42 +103,54 @@ def send():
 	global module_name
 	module_name = "Partage de fichiers (Socket)"
 	banner()
-	s = socket.socket()
+	filename = input(Fore.WHITE + str("""
+	  Entrez le chemin du fichier à partager : """))
+	try:
+ 		with open(filename): pass
+	except IOError:
+		print(Fore.RED + f"""
+	   Le fichier {filename} est introuvable...
+        """)
+		sleep(2)
+		clear()
+		send()
+	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-	url = str(ngrok.connect(8080).public_url)
-	#url = url.replace("http://","")
 	host = '0.0.0.0'
 	port = 8080
 	s.bind((host,port))
 	s.listen(1)
+	public_url = ngrok.connect(port, "tcp", options={"remote_addr": "{}:{}".format(host, port)})
 	print(Fore.YELLOW + f"""
-	   Votre url de partage : {url}
+	   Votre url de partage : {public_url}
 	    Est en attente de connexion d'un récepteur...""")
-	conn, addr = s.accept()
-	print(Fore.GREEN + f"""
+	while True:
+		conn, addr = s.accept()
+		print(Fore.GREEN + f"""
 	   {addr} est connecté en tant que récepteur""")
-	filename = input(Fore.WHITE + """
-	  Entrez le chemin du fichier à partager : """)
-	try:
-		file = open(filename, 'rb')
-		file_data = file.read(1024)
-		conn.send(file_data)
-		file.close()
-		print(Fore.GREEN + """
-	   Réception du fichier avec succès
-		""")
-	except:
-		print(Fore.RED + f"""
+		try:
+			file = open(filename, 'rb')
+			file_data = file.read(1024)
+			conn.send(file_data)
+			file.close()
+			print(Fore.GREEN + f"""
+	   Réception du fichier avec succès pour {addr}""")
+			print(Fore.YELLOW + """
+	   En attente d'un autre récepteur...""")
+		except:
+			print(Fore.RED + f"""
 	   Le fichier {filename} est introuvable...
         	""")
-		sleep(2)
-		exit()
+			sleep(2)
+			s.close()
+			break
+			exit()
 
 def receive():
 	global module_name
 	module_name = "Réception de fichiers (Socket)"
 	banner()
-	s = socket.socket()
+	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 	host = input(Fore.WHITE + str("""
 	  Entrez l'url de partage de l'envoyeur : """))
@@ -133,6 +170,7 @@ def receive():
 		file.close()
 		os.remove(filename)
 		sleep(2)
+		s.close()
 		exit()
 	else:
 		file.write(file_data)
@@ -140,6 +178,8 @@ def receive():
 		print(Fore.GREEN + f"""
 	   Fichier {filename} reçu avec succès
 	  	""")
+		s.close()
+		exit()
 
 def tunnels():
 	global module_name
@@ -148,6 +188,103 @@ def tunnels():
 	print(Fore.GREEN + f"""
 	   {ngrok.get_ngrok_process()}
 	""")
+
+def region():
+	global module_name
+	module_name = "Région par défaut (Ngrok)"
+	banner()
+	if conf.get_default().region != None:
+		print(Fore.YELLOW + f"""
+	   Région par défaut : {conf.get_default().region}
+	   """)
+	conf.get_default().region = input(Fore.WHITE + str("""
+	  Entrez une région (ISO-3166) : """))
+	if conf.get_default().region != "":
+		reg = open("lang.txt", "w")
+		reg.write(conf.get_default().region)
+		reg.close()
+		print(Fore.GREEN + f"""
+	   La langue {conf.get_default().region} a été définie avec succès
+		""")
+		exit()
+	else:
+		conf.get_default().region = None
+		print(Fore.RED + f"""
+	   Entrez une valeur pour l'AuthToken...
+		""")
+		sleep(2)
+		clear()
+		region()
+
+def compress():
+	global module_name
+	module_name = "Compression de fichiers (Zip)"
+	banner()
+	filezip = input(Fore.WHITE + str("""
+	  Entrez le nom du fichier zip : """))
+	if ".zip" in filezip:
+		zip = zipfile.ZipFile(filezip, 'w')
+		filename = input(Fore.WHITE + str("""
+	  Entrez le chemin des fichiers à compresser : """))
+		try:
+			zip.write(filename)
+			zip.close()
+		except:
+			print(Fore.RED + f"""
+	   Le fichier {filename} est introuvable...
+        	""")
+			sleep(2)
+			zip.close()
+			os.remove(filezip)
+			clear()
+			compress()
+	else:
+		filezip = str(f"{filezip}.zip")
+		zip = zipfile.ZipFile(filezip, 'w')
+		filename = input(Fore.WHITE + str("""
+	  Entrez le chemin des fichiers à compresser : """))
+		try:
+			zip.write(filename)
+			zip.close()
+		except:
+			print(Fore.RED + f"""
+	   Le fichier {filename} est introuvable...
+        	""")
+			sleep(2)
+			zip.close()
+			os.remove(filezip)
+			clear()
+			compress()
+
+def authtoken():
+	global module_name
+	module_name = "AuthToken par défaut (Ngrok)"
+	banner()
+	print(Fore.YELLOW + """
+	   AuthToken sur : https://dashboard.ngrok.com/signup
+	""")
+	if conf.get_default().auth_token != None:
+		print(Fore.YELLOW + f"""
+	   AuthToken par défaut : {conf.get_default().auth_token}
+	   """)
+	conf.get_default().auth_token = input(Fore.WHITE + str("""
+	  Entrez un nouveau AuthToken : """))
+	if conf.get_default().auth_token != "":
+		auth = open("token.txt", "w")
+		auth.write(conf.get_default().auth_token)
+		auth.close()
+		print(Fore.GREEN + f"""
+	   L'AuthToken {conf.get_default().auth_token} a été défini avec succès
+		""")
+		exit()
+	else:
+		conf.get_default().auth_token = None
+		print(Fore.RED + f"""
+	   Entrez une valeur pour l'AuthToken...
+		""")
+		sleep(2)
+		clear()
+		authtoken()
 
 def coming():
 	print(Fore.GREEN + """
