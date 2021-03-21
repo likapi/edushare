@@ -131,7 +131,9 @@ def send():
 	   {addr} est connecté en tant que récepteur""")
 		try:
 			file = open(filename, 'rb')
-			file_data = file.read(1024)
+			octets = os.path.getsize(filename)
+			print(octets)
+			file_data = file.read(1024 * 1024)
 			file_data = file_data.decode()
 			filename = os.path.basename(filename)
 			datafinal = bytes(f"{filename}:{file_data}", 'utf-8')
@@ -166,7 +168,7 @@ def receive():
 	s.connect((host,port))
 	print(Fore.GREEN + f"""
 	   Vous êtes connecté à {host}...""")
-	file_data = s.recv(1024)
+	file_data = s.recv(1024 * 1024)
 	separate = file_data.decode()
 	title = separate.split(":")
 	filename = str(title[0])

@@ -1,0 +1,4 @@
+colorama==0.3.7
+pyfiglet==0.8.post1
+pyngrok==5.0.4
+zipp==3.4.1
