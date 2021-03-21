@@ -132,7 +132,6 @@ def send():
 		try:
 			file = open(filename, 'rb')
 			octets = os.path.getsize(filename)
-			print(octets)
 			file_data = file.read(1024 * 1024)
 			file_data = file_data.decode()
 			filename = os.path.basename(filename)
