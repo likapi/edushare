@@ -131,7 +131,7 @@ def send():
 		try:
 			file = open(filename, 'rb')
 			file_data = file.read(1024)
-			conn.send(file_data)
+			conn.send(file_data) #{filename}{SEPARATOR}
 			file.close()
 			print(Fore.GREEN + f"""
 	   Réception du fichier avec succès pour {addr}""")
@@ -229,6 +229,9 @@ def compress():
 		try:
 			zip.write(filename)
 			zip.close()
+			print(Fore.GREEN + f"""
+	   Compression des fichiers avec succès
+	   		""")
 		except:
 			print(Fore.RED + f"""
 	   Le fichier {filename} est introuvable...
@@ -246,6 +249,9 @@ def compress():
 		try:
 			zip.write(filename)
 			zip.close()
+			print(Fore.GREEN + f"""
+	   Compression des fichiers avec succès
+	   		""")
 		except:
 			print(Fore.RED + f"""
 	   Le fichier {filename} est introuvable...
