@@ -132,7 +132,10 @@ def send():
 		try:
 			file = open(filename, 'rb')
 			file_data = file.read(1024)
-			conn.send(file_data) #{filename}{SEPARATOR}
+			file_data = file_data.decode()
+			filename = os.path.basename(filename)
+			datafinal = bytes(f"{filename}:{file_data}", 'utf-8')
+			conn.send(datafinal)
 			file.close()
 			print(Fore.GREEN + f"""
 	   Réception du fichier avec succès pour {addr}""")
@@ -163,12 +166,13 @@ def receive():
 	s.connect((host,port))
 	print(Fore.GREEN + f"""
 	   Vous êtes connecté à {host}...""")
-	ext = input(Fore.WHITE + str("""
-	  Entrez l'extension du fichier : """))
-	filename = str(f"download.{ext}")
-	file = open(filename, "wb")
 	file_data = s.recv(1024)
-	if len(file_data) == 0:
+	separate = file_data.decode()
+	title = separate.split(":")
+	filename = str(title[0])
+	deletetitle = str(f"{filename}:")
+	file = open(filename, "wb")
+	if len(file_data.decode()) == 0:
 		print(Fore.RED + """
 	   L'envoyeur s'est déconnecté...
     	""")
@@ -178,6 +182,9 @@ def receive():
 		s.close()
 		exit()
 	else:
+		file_data = file_data.decode()
+		file_data = file_data.replace(deletetitle, "")
+		file_data = file_data.encode()
 		file.write(file_data)
 		file.close()
 		print(Fore.GREEN + f"""
