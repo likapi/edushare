@@ -125,23 +125,43 @@ def send():
 	print(Fore.YELLOW + f"""
 	   Votre url de partage : {url}
 	    Est en attente de connexion d'un récepteur...""")
-	while True:
+	while (s.connect):
 		conn, addr = s.accept()
 		print(Fore.GREEN + f"""
 	   {addr} est connecté en tant que récepteur""")
 		try:
 			file = open(filename, 'rb')
 			octets = os.path.getsize(filename)
-			file_data = file.read(1024 * 1024)
-			file_data = file_data.decode()
-			filename = os.path.basename(filename)
-			datafinal = bytes(f"{filename}:{file_data}", 'utf-8')
-			conn.send(datafinal)
-			file.close()
-			print(Fore.GREEN + f"""
-	   Réception du fichier avec succès pour {addr}""")
-			print(Fore.YELLOW + """
+			maxo = 1024 * 1024
+			num = 0
+			print(f"{octets}et{maxo}")
+			if octets > num:
+				while num < octets:
+					file_data.seek(num, 0)
+					file_data = file.read(maxo)
+					file_data = file_data.decode()
+					filename = os.path.basename(filename)
+					datafinal = bytes(f"{filename}:{file_data}", 'utf-8')
+					conn.send(datafinal)
+					num = num + maxo
+					if num == octets:
+						print(Fore.GREEN + f"""
+	   Réception du fichier avec succès pour {addr} découpe""")
+						print(Fore.YELLOW + """
 	   En attente d'un autre récepteur...""")
+						break
+						file_data.close()
+			else:
+				file_data = file.read(maxo)
+				file_data = file_data.decode()
+				filename = os.path.basename(filename)
+				datafinal = bytes(f"{filename}:{file_data}", 'utf-8')
+				conn.send(datafinal)
+				print(Fore.GREEN + f"""
+	   Réception du fichier avec succès pour {addr}""")
+				print(Fore.YELLOW + """
+	   En attente d'un autre récepteur...""")
+				file_data.close()
 		except:
 			print(Fore.RED + f"""
 	   Le fichier {filename} est introuvable...
@@ -167,32 +187,34 @@ def receive():
 	s.connect((host,port))
 	print(Fore.GREEN + f"""
 	   Vous êtes connecté à {host}...""")
-	file_data = s.recv(1024 * 1024)
-	separate = file_data.decode()
-	title = separate.split(":")
-	filename = str(title[0])
-	deletetitle = str(f"{filename}:")
-	file = open(filename, "wb")
-	if len(file_data.decode()) == 0:
-		print(Fore.RED + """
+	while (s.connect):
+		file_data = s.recv(1024 * 1024)
+		separate = file_data.decode()
+		title = separate.split(":")
+		filename = str(title[0])
+		deletetitle = str(f"{filename}:")
+		file = open(filename, "wb")
+		if len(file_data.decode()) == 0:
+			print(Fore.RED + """
 	   L'envoyeur s'est déconnecté...
-    	""")
-		file.close()
-		os.remove(filename)
-		sleep(2)
-		s.close()
-		exit()
-	else:
-		file_data = file_data.decode()
-		file_data = file_data.replace(deletetitle, "")
-		file_data = file_data.encode()
-		file.write(file_data)
-		file.close()
-		print(Fore.GREEN + f"""
+    		""")
+			file.close()
+			os.remove(filename)
+			sleep(2)
+			s.close()
+			break
+			exit()
+		else:
+			file_data = file_data.decode()
+			file_data = file_data.replace(deletetitle, "")
+			file_data = file_data.encode()
+			file.write(file_data)
+			file.close()
+			print(Fore.GREEN + f"""
 	   Fichier {filename} reçu avec succès
-	  	""")
-		s.close()
-		exit()
+	  		""")
+			s.close()
+			exit()
 
 def tunnels():
 	global module_name
