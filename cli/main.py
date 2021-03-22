@@ -132,21 +132,20 @@ def send():
 		try:
 			file = open(filename, 'rb')
 			octets = os.path.getsize(filename)
-			maxo = 1024 * 1024
+			maxo = 1024
 			num = 0
-			print(f"{octets}et{maxo}")
 			if octets > num:
 				while num < octets:
-					file_data.seek(num, 0)
+					file.seek(num, 0)
 					file_data = file.read(maxo)
 					file_data = file_data.decode()
 					filename = os.path.basename(filename)
 					datafinal = bytes(f"{filename}:{file_data}", 'utf-8')
 					conn.send(datafinal)
 					num = num + maxo
-					if num == octets:
+					if num > octets:
 						print(Fore.GREEN + f"""
-	   Réception du fichier avec succès pour {addr} découpe""")
+	   Réception du fichier avec succès pour {addr}""")
 						print(Fore.YELLOW + """
 	   En attente d'un autre récepteur...""")
 						break
@@ -192,7 +191,8 @@ def receive():
 		separate = file_data.decode()
 		title = separate.split(":")
 		filename = str(title[0])
-		deletetitle = str(f"{filename}:")
+		file_data = title[1]
+		file_data = file_data.encode()
 		file = open(filename, "wb")
 		if len(file_data.decode()) == 0:
 			print(Fore.RED + """
@@ -205,16 +205,13 @@ def receive():
 			break
 			exit()
 		else:
-			file_data = file_data.decode()
-			file_data = file_data.replace(deletetitle, "")
-			file_data = file_data.encode()
 			file.write(file_data)
-			file.close()
-			print(Fore.GREEN + f"""
+	file.close()
+	print(Fore.GREEN + f"""
 	   Fichier {filename} reçu avec succès
-	  		""")
-			s.close()
-			exit()
+	""")
+	s.close()
+	exit()
 
 def tunnels():
 	global module_name
