@@ -135,15 +135,15 @@ def send():
 			maxo = 1024
 			num = 0
 			if octets > num:
-				while num < octets:
+				while num <= octets:
 					file.seek(num, 0)
 					file_data = file.read(maxo)
 					file_data = file_data.decode()
 					filename = os.path.basename(filename)
-					datafinal = bytes(f"{filename}:{file_data}", 'utf-8')
+					datafinal = bytes(f"{filename}:edushare:{octets}:edushare:{file_data}", 'utf-8')
 					conn.send(datafinal)
 					num = num + maxo
-					if num > octets:
+					if num >= octets:
 						print(Fore.GREEN + f"""
 	   Réception du fichier avec succès pour {addr}""")
 						print(Fore.YELLOW + """
@@ -189,12 +189,15 @@ def receive():
 	while (s.connect):
 		file_data = s.recv(1024 * 1024)
 		separate = file_data.decode()
-		title = separate.split(":")
+		title = separate.split(":edushare:")
 		filename = str(title[0])
-		file_data = title[1]
+		octets = int(title[1])
+		file_data = title[2]
 		file_data = file_data.encode()
-		file = open(filename, "wb")
-		if len(file_data.decode()) == 0:
+		num = 0
+		maxo = 1024
+		file = open(filename, "ab")
+		if len(file_data) == 0:
 			print(Fore.RED + """
 	   L'envoyeur s'est déconnecté...
     		""")
@@ -205,13 +208,31 @@ def receive():
 			break
 			exit()
 		else:
-			file.write(file_data)
-	file.close()
-	print(Fore.GREEN + f"""
+			if octets > maxo:
+				while num <= octets:
+					file.write(file_data)
+					file_data = s.recv(1024 * 1024)
+					file_data = file_data.decode()
+					file_data = file_data.replace(f"{filename}:edushare:{octets}:edushare:","")
+					file_data = file_data.encode()
+					num = num + maxo
+				if num >= octets:
+					file.close()
+					print(Fore.GREEN + f"""
 	   Fichier {filename} reçu avec succès
-	""")
-	s.close()
-	exit()
+					""")
+					s.close()
+					break
+					exit()
+			else:
+				file.write(file_data)
+				file.close()
+				print(Fore.GREEN + f"""
+	   Fichier {filename} reçu avec succès
+				""")
+				s.close()
+				break
+				exit()
 
 def tunnels():
 	global module_name
