@@ -216,14 +216,14 @@ def receive():
 					file_data = file_data.replace(f"{filename}:edushare:{octets}:edushare:","")
 					file_data = file_data.encode()
 					num = num + maxo
-				if num >= octets:
-					file.close()
-					print(Fore.GREEN + f"""
+					if num >= octets:
+						file.close()
+						print(Fore.GREEN + f"""
 	   Fichier {filename} reçu avec succès
-					""")
-					s.close()
-					break
-					exit()
+						""")
+						s.close()
+						break
+						exit()
 			else:
 				file.write(file_data)
 				file.close()
