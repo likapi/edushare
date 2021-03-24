@@ -132,13 +132,14 @@ def send():
 		try:
 			file = open(filename, 'rb')
 			octets = os.path.getsize(filename)
-			maxo = 1024
+			maxo = 1024 * 1024
 			num = 0
-			if octets > num:
+			if octets > maxo:
 				while num <= octets:
 					file.seek(num, 0)
 					file_data = file.read(maxo)
-					file_data = file_data.decode()
+					if ".txt" in filename or ".html" in filename:
+						file_data = file_data.decode()
 					filename = os.path.basename(filename)
 					datafinal = bytes(f"{filename}:edushare:{octets}:edushare:{file_data}", 'utf-8')
 					conn.send(datafinal)
@@ -195,7 +196,7 @@ def receive():
 		file_data = title[2]
 		file_data = file_data.encode()
 		num = 0
-		maxo = 1024
+		maxo = 1024 * 1024
 		file = open(filename, "ab")
 		if len(file_data) == 0:
 			print(Fore.RED + """
