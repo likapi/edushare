@@ -65,7 +65,7 @@ def main():
 	print(Fore.YELLOW + """
      [1]. Partage     [2]. Réception     [3]. Compression
      [4]. Tunnels     [5]. Région        [6]. AuthToken
-     [7]. Historique  [8]. Aide          [0]. Quitter 
+     [7]. Historique  [8]. Aide          [0]. Quitter
 		""")
 	menu = input(Fore.WHITE + str("""
 	  Entrez un numéro : """))
@@ -97,7 +97,7 @@ def main():
 			sleep(2)
 			clear()
 			main()
-			
+
 def send():
 	ngrok.get_ngrok_process().stop_monitor_thread()
 	global module_name
@@ -138,8 +138,7 @@ def send():
 				while num <= octets:
 					file.seek(num, 0)
 					file_data = file.read(maxo)
-					if ".txt" in filename or ".html" in filename:
-						file_data = file_data.decode()
+					file_data = file_data.decode()
 					filename = os.path.basename(filename)
 					datafinal = bytes(f"{filename}:edushare:{octets}:edushare:{file_data}", 'utf-8')
 					conn.send(datafinal)
@@ -155,7 +154,7 @@ def send():
 				file_data = file.read(maxo)
 				file_data = file_data.decode()
 				filename = os.path.basename(filename)
-				datafinal = bytes(f"{filename}:{file_data}", 'utf-8')
+				datafinal = bytes(f"{filename}:edushare:{octets}:edushare:{file_data}", 'utf-8')
 				conn.send(datafinal)
 				print(Fore.GREEN + f"""
 	   Réception du fichier avec succès pour {addr}""")
@@ -226,6 +225,9 @@ def receive():
 						break
 						exit()
 			else:
+				file_data = file_data.decode()
+				file_data = file_data.replace(f"{filename}:edushare:{octets}:edushare:","")
+				file_data = file_data.encode()
 				file.write(file_data)
 				file.close()
 				print(Fore.GREEN + f"""
@@ -363,7 +365,7 @@ def close():
 
 def clear():
 	#clear la console
-	_ = system('clear') 
+	_ = system('clear')
 
 if __name__ == "__main__":
 	clear()
