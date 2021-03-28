@@ -10,6 +10,14 @@ Nous remercions par avance, chaque personne contribuant au développement du pro
 
 ## Installation
 
+### Windows :
+
+### Linux :
+
+```shell
+#prochainement disponible
+```
+
 
 
 ## Utilisation
@@ -20,11 +28,13 @@ Nous remercions par avance, chaque personne contribuant au développement du pro
 - [ ] Réception de fichiers (Socket)
 - [x] Compression de fichiers (.zip)
 - [x] Affichage des tunnels (Ngrok)
-- [x] Modification de la région de (Ngrok)
+- [x] Modification de la région (Ngrok)
 - [x] Ajout d'un AuthToken (Ngrok)
 - [ ] Affichage de l'historique
-- [ ] Guide d'utilisation
+- [ ] Guide d'utilisation du logiciel
 - [x] Fermeture du client
 
 ## Contribution
+
+Rédaction en cours...
 
