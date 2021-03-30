@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-import colorama, datetime, pyfiglet, socket, os, zipfile
+import colorama, datetime, pyfiglet, socket, os, zipfile, http.server, socketserver
 from os import system, name
 from sys import platform as _platform
 from time import sleep
@@ -103,72 +103,90 @@ def send():
 	global module_name
 	module_name = "Partage de fichiers (Socket)"
 	banner()
-	filename = input(Fore.WHITE + str("""
+	if conf.get_default().auth_token == None:
+		if not os.path.exists("partage"):
+ 			os.makedirs("partage")
+		print(Fore.YELLOW + """
+	   Glissez vos fichiers à partager dans le dossier partage...""")
+		port = 80
+		web_dir = os.path.join(os.path.dirname(__file__), 'partage')
+		os.chdir(web_dir)
+		http_tunnel = ngrok.connect(bind_tls=True).public_url
+		address = ("0.0.0.0", port)
+		handler = http.server.SimpleHTTPRequestHandler
+		httpd = socketserver.TCPServer(address, handler)
+		print(Fore.GREEN + f"""
+	   Votre url de partage : {http_tunnel}
+	    Est en attente de connexion d'un récepteur...
+		""")
+		httpd.serve_forever()
+	else:
+		filename = input(Fore.WHITE + str("""
 	  Entrez le chemin du fichier à partager : """))
-	try:
- 		with open(filename): pass
-	except IOError:
-		print(Fore.RED + f"""
+		try:
+ 			with open(filename): pass
+		except IOError:
+			print(Fore.RED + f"""
 	   Le fichier {filename} est introuvable...
-        """)
-		sleep(2)
-		clear()
-		send()
-	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-	host = '0.0.0.0'
-	port = 8080
-	s.bind((host,port))
-	s.listen(1)
-	url = ngrok.connect(port, "tcp").public_url
-	url = str(url).replace("tcp://", "")
-	print(Fore.YELLOW + f"""
+        	""")
+			sleep(2)
+			clear()
+			send()
+		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+		host = '0.0.0.0'
+		port = 8080
+		s.bind((host,port))
+		s.listen(1)
+		url = ngrok.connect(port, "tcp").public_url
+		url = str(url).replace("tcp://", "")
+		print(Fore.YELLOW + f"""
 	   Votre url de partage : {url}
 	    Est en attente de connexion d'un récepteur...""")
-	while (s.connect):
-		conn, addr = s.accept()
-		print(Fore.GREEN + f"""
+		while (s.connect):
+			conn, addr = s.accept()
+			print(Fore.GREEN + f"""
 	   {addr} est connecté en tant que récepteur""")
-		try:
-			file = open(filename, 'rb')
-			octets = os.path.getsize(filename)
-			maxo = 1024 * 1024
-			num = 0
-			if octets > maxo:
-				while num <= octets:
-					file.seek(num, 0)
+			try:
+				file = open(filename, 'rb')
+				octets = os.path.getsize(filename)
+				maxo = 1024 * 1024
+				num = 0
+				if octets > maxo:
+					while num <= octets:
+						file.seek(num, 0)
+						file_data = file.read(maxo)
+						file_data = file_data.decode()
+						filename = os.path.basename(filename)
+						datafinal = bytes(f"{filename}:edushare:{octets}:edushare:{file_data}", 'utf-8')
+						conn.send(datafinal)
+						num = num + maxo
+						if num >= octets:
+							print(Fore.GREEN + f"""
+	   Réception du fichier avec succès pour {addr}""")
+							print(Fore.YELLOW + """
+	   En attente d'un autre récepteur...""")
+							break
+							file_data.close()
+				else:
 					file_data = file.read(maxo)
 					file_data = file_data.decode()
 					filename = os.path.basename(filename)
 					datafinal = bytes(f"{filename}:edushare:{octets}:edushare:{file_data}", 'utf-8')
 					conn.send(datafinal)
-					num = num + maxo
-					if num >= octets:
-						print(Fore.GREEN + f"""
+					print(Fore.GREEN + f"""
 	   Réception du fichier avec succès pour {addr}""")
-						print(Fore.YELLOW + """
+					print(Fore.YELLOW + """
 	   En attente d'un autre récepteur...""")
-						break
-						file_data.close()
-			else:
-				file_data = file.read(maxo)
-				file_data = file_data.decode()
-				filename = os.path.basename(filename)
-				datafinal = bytes(f"{filename}:edushare:{octets}:edushare:{file_data}", 'utf-8')
-				conn.send(datafinal)
-				print(Fore.GREEN + f"""
-	   Réception du fichier avec succès pour {addr}""")
-				print(Fore.YELLOW + """
-	   En attente d'un autre récepteur...""")
-				file_data.close()
-		except:
-			print(Fore.RED + f"""
+					file_data.close()
+			except:
+				print(Fore.RED + f"""
 	   Le fichier {filename} est introuvable...
-        	""")
-			sleep(2)
-			s.close()
-			break
-			exit()
+        		""")
+				sleep(2)
+				s.close()
+				break
+				exit()
 
 def receive():
 	global module_name
