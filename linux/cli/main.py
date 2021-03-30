@@ -108,10 +108,10 @@ def send():
  			os.makedirs("partage")
 		print(Fore.YELLOW + """
 	   Glissez vos fichiers à partager dans le dossier partage...""")
-		port = 80
+		port = 8080
 		web_dir = os.path.join(os.path.dirname(__file__), 'partage')
 		os.chdir(web_dir)
-		http_tunnel = ngrok.connect(bind_tls=True).public_url
+		http_tunnel = ngrok.connect(port, bind_tls=True).public_url
 		address = ("0.0.0.0", port)
 		handler = http.server.SimpleHTTPRequestHandler
 		httpd = socketserver.TCPServer(address, handler)
