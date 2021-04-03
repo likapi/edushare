@@ -1,10 +1,11 @@
 #!/usr/bin/python3
-import colorama, datetime, pyfiglet, socket, os, zipfile, http.server, socketserver, webbrowser
+import colorama, datetime, pyfiglet, socket, os, zipfile, http.server, socketserver, webbrowser, requests
 from os import system, name
 from sys import platform as _platform
 from time import sleep
 from pyfiglet import Figlet
 from colorama import Fore, Back, Style
+from bs4 import BeautifulSoup
 from pyngrok import ngrok, conf
 
 #config
@@ -120,9 +121,6 @@ def send():
 	    Est en attente de connexion d'un récepteur...
 		""" + Fore.YELLOW)
 		httpd.serve_forever()
-		if response_code == 200:
-			print(Fore.GREEN + f"""
-	   {addr} est connecté en tant que récepteur""")
 	else:
 		filename = input(Fore.WHITE + str("""
 	  Entrez le chemin du fichier à partager : """))
