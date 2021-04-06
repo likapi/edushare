@@ -1,0 +1,13 @@
+#!/bin/bash
+
+cli="/usr/share/edushare/"
+depvalid="/usr/share/edushare/config/valid-dep.txt"
+
+if [ -e $cli"config/valid-dep.txt" ]
+then
+	python3 $cli"cli/main.py"
+else
+	pip3 install -r $cli"config/requirements.txt"
+	touch $depvalid
+	python3 $cli"cli/main.py"
+fi

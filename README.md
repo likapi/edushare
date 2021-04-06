@@ -26,8 +26,8 @@ L'installation du logiciel a été simplifiée au maximum pour éviter aux élè
 
 ### Fonctionnalités :
 
-- [ ] Partage de fichiers (Socket)
-- [ ] Réception de fichiers (Socket)
+- [x] Partage de fichiers (Socket)
+- [x] Réception de fichiers (Socket)
 - [x] Compression de fichiers (.zip)
 - [x] Affichage des tunnels (Ngrok)
 - [x] Modification de la région (Ngrok)

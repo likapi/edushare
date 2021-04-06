@@ -1,0 +1,10 @@
+Package: edushare
+Version: 1.0
+Section: base
+Priority: optional
+Architecture: all
+Depends: bash
+Maintainer: Keany Vy KHUN <keanyvy@keemail.me>
+Description: Un logiciel de partage de fichiers entre élèves et professeurs.
+Homepage: https://likapi.github.io/education
+

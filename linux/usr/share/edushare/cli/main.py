@@ -14,16 +14,16 @@ font = Figlet(font='graffiti') #pyfiglet font
 now = datetime.datetime.now() #datetime get time
 #ngrok conf persistent
 try:
-	with open("lang.txt"):
-		regconf = open("lang.txt", "r")
+	with open("/usr/share/edushare/cli/lang.txt"):
+		regconf = open("/usr/share/edushare/cli/lang.txt", "r")
 		conf.get_default().region = regconf.read()
 		regconf.close()
 except IOError:
 	conf.get_default().region = None #ngrok default region
 
 try:
-	with open("token.txt"):
-		authconf = open("token.txt", "r")
+	with open("/usr/share/edushare/cli/token.txt"):
+		authconf = open("/usr/share/edushare/cli/token.txt", "r")
 		conf.get_default().auth_token = authconf.read()
 		authconf.close()
 except IOError:
@@ -104,23 +104,24 @@ def send():
 	global module_name
 	module_name = "Partage de fichiers (Socket)"
 	banner()
-	if conf.get_default().auth_token == None:
-		if not os.path.exists("partage"):
- 			os.makedirs("partage")
-		print(Fore.YELLOW + """
+	if not os.path.exists("/usr/share/edushare/cli/partage"):
+ 		os.makedirs("/usr/share/edushare/cli/partage")
+	print(Fore.YELLOW + """
 	   Glissez vos fichiers à partager dans le dossier partage...""")
-		port = 8080
-		web_dir = os.path.join(os.path.dirname(__file__), 'partage')
-		os.chdir(web_dir)
-		http_tunnel = ngrok.connect(port, bind_tls=True).public_url
-		address = ("0.0.0.0", port)
-		handler = http.server.SimpleHTTPRequestHandler
-		httpd = socketserver.TCPServer(address, handler)
-		print(Fore.GREEN + f"""
+	sleep(2)
+	webbrowser.open('/usr/share/edushare/cli/partage')
+	port = 8080
+	web_dir = os.path.join(os.path.dirname(__file__), '/usr/share/edushare/cli/partage')
+	os.chdir(web_dir)
+	http_tunnel = ngrok.connect(port, bind_tls=True).public_url
+	address = ("0.0.0.0", port)
+	handler = http.server.SimpleHTTPRequestHandler
+	httpd = socketserver.TCPServer(address, handler)
+	print(Fore.GREEN + f"""
 	   Votre url de partage : {http_tunnel}
 	    Est en attente de connexion d'un récepteur...
-		""" + Fore.YELLOW)
-		httpd.serve_forever()
+	""" + Fore.YELLOW)
+	httpd.serve_forever()
 
 def receive():
 	global module_name
@@ -165,7 +166,7 @@ def region():
 	conf.get_default().region = input(Fore.WHITE + str("""
 	  Entrez une région (ISO-3166) : """))
 	if conf.get_default().region != "":
-		reg = open("lang.txt", "w")
+		reg = open("/usr/share/edushare/cli/lang.txt", "w")
 		reg.write(conf.get_default().region)
 		reg.close()
 		print(Fore.GREEN + f"""
@@ -241,7 +242,7 @@ def authtoken():
 	conf.get_default().auth_token = input(Fore.WHITE + str("""
 	  Entrez un nouveau AuthToken : """))
 	if conf.get_default().auth_token != "":
-		auth = open("token.txt", "w")
+		auth = open("/usr/share/edushare/cli/token.txt", "w")
 		auth.write(conf.get_default().auth_token)
 		auth.close()
 		print(Fore.GREEN + f"""
