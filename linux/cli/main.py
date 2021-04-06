@@ -121,73 +121,6 @@ def send():
 	    Est en attente de connexion d'un récepteur...
 		""" + Fore.YELLOW)
 		httpd.serve_forever()
-	else:
-		filename = input(Fore.WHITE + str("""
-	  Entrez le chemin du fichier à partager : """))
-		try:
- 			with open(filename): pass
-		except IOError:
-			print(Fore.RED + f"""
-	   Le fichier {filename} est introuvable...
-        	""")
-			sleep(2)
-			clear()
-			send()
-		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-		host = '0.0.0.0'
-		port = 8080
-		s.bind((host,port))
-		s.listen(1)
-		url = ngrok.connect(port, "tcp").public_url
-		url = str(url).replace("tcp://", "")
-		print(Fore.YELLOW + f"""
-	   Votre url de partage : {url}
-	    Est en attente de connexion d'un récepteur...""")
-		while (s.connect):
-			conn, addr = s.accept()
-			print(Fore.GREEN + f"""
-	   {addr} est connecté en tant que récepteur""")
-			try:
-				file = open(filename, 'rb')
-				octets = os.path.getsize(filename)
-				maxo = 1024 * 1024
-				num = 0
-				if octets > maxo:
-					while num <= octets:
-						file.seek(num, 0)
-						file_data = file.read(maxo)
-						file_data = file_data.decode()
-						filename = os.path.basename(filename)
-						datafinal = bytes(f"{filename}:edushare:{octets}:edushare:{file_data}", 'utf-8')
-						conn.send(datafinal)
-						num = num + maxo
-						if num >= octets:
-							print(Fore.GREEN + f"""
-	   Réception du fichier avec succès pour {addr}""")
-							print(Fore.YELLOW + """
-	   En attente d'un autre récepteur...""")
-							break
-							file_data.close()
-				else:
-					file_data = file.read(maxo)
-					file_data = file_data.decode()
-					filename = os.path.basename(filename)
-					datafinal = bytes(f"{filename}:edushare:{octets}:edushare:{file_data}", 'utf-8')
-					conn.send(datafinal)
-					print(Fore.GREEN + f"""
-	   Réception du fichier avec succès pour {addr}""")
-					print(Fore.YELLOW + """
-	   En attente d'un autre récepteur...""")
-					file_data.close()
-			except:
-				print(Fore.RED + f"""
-	   Le fichier {filename} est introuvable...
-        		""")
-				sleep(2)
-				s.close()
-				break
-				exit()
 
 def receive():
 	global module_name
@@ -198,81 +131,20 @@ def receive():
 	host = input(Fore.WHITE + str("""
 	  Entrez l'url de partage : """))
 	port = 8080
-	if "tcp://" in host:
-		if ":" in host:
-			ngrok = host.split(":")
-			host = str(ngrok[0])
-			port = int(ngrok[1])
-		s.connect((host,port))
+	if "ngrok.io" in host:
 		print(Fore.GREEN + f"""
-	   Vous êtes connecté à {host}...""")
-		if not os.path.exists("recevoir"):
- 			os.makedirs("recevoir")
-		while (s.connect):
-			file_data = s.recv(1024 * 1024)
-			separate = file_data.decode()
-			title = separate.split(":edushare:")
-			filename = str(title[0])
-			octets = int(title[1])
-			file_data = title[2]
-			file_data = file_data.encode()
-			num = 0
-			maxo = 1024 * 1024
-			file = open(filename, "ab")
-			if len(file_data) == 0:
-				print(Fore.RED + """
-	   L'envoyeur s'est déconnecté...
-    			""")
-				file.close()
-				os.remove(filename)
-				sleep(2)
-				s.close()
-				break
-				exit()
-			else:
-				if octets > maxo:
-					while num <= octets:
-						file.write(file_data)
-						file_data = s.recv(1024 * 1024)
-						file_data = file_data.decode()
-						file_data = file_data.replace(f"{filename}:edushare:{octets}:edushare:","")
-						file_data = file_data.encode()
-						num = num + maxo
-						if num >= octets:
-							file.close()
-							print(Fore.GREEN + f"""
-	   Fichier {filename} reçu avec succès dans le dossier recevoir
-							""")
-							s.close()
-							break
-							exit()
-				else:
-					file_data = file_data.decode()
-					file_data = file_data.replace(f"{filename}:edushare:{octets}:edushare:","")
-					file_data = file_data.encode()
-					file.write(file_data)
-					file.close()
-					print(Fore.GREEN + f"""
-	   Fichier {filename} reçu avec succès dans le dossier recevoir
-					""")
-					s.close()
-					break
-					exit()
-	else:
-		if "https://" in host:
-			print(Fore.GREEN + f"""
 	   Vous êtes connecté à {host}...
-			""")
-			sleep(2)
-			webbrowser.open(host)
-			exit()
-		else:
-			print(Fore.RED + """
+		""")
+		sleep(2)
+		webbrowser.open(host)
+		exit()
+	else:
+		print(Fore.RED + """
 	   Url de partage invalide...
-			""")
-			slee(2)
-			clear()
-			receive()
+		""")
+		sleep(2)
+		clear()
+		receive()
 
 def tunnels():
 	global module_name
