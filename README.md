@@ -18,14 +18,14 @@ L'installation du logiciel a été simplifiée au maximum pour éviter aux élè
 
 ```shell
 ~# wget https://github.com/likapi/edushare/releases/download/v1.0-beta-linux/v1.0-beta-linux-edushare.deb
-~# dpkg -i v1.0-beta-linux-edushare.deb
+~# sudo dpkg -i v1.0-beta-linux-edushare.deb
 ```
 
 ## Utilisation
 
 ```shell
-~# edushare
-~# edushare-gui
+~# sudo edushare
+~# sudo edushare-gui
 ```
 
 ### Fonctionnalités :
