@@ -1,2 +1,3 @@
-#!/bin/bash 
+#!/bin/bash
+rm -Rf "/usr/share/edushare"
 echo "Supression du client EduShare terminée !"
