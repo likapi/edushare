@@ -8,7 +8,6 @@ then
 	python3 $cli"cli/main.py"
 else
 	pip3 install -r $cli"config/requirements.txt"
-	chmod -R 777 $cli
 	touch $depvalid
 	python3 $cli"cli/main.py"
 fi

@@ -106,6 +106,7 @@ def send():
 	banner()
 	if not os.path.exists("/usr/share/edushare/cli/partage"):
  		os.makedirs("/usr/share/edushare/cli/partage")
+ 		os.chmod("/usr/share/edushare/cli/partage", stat.S_IRWXU)
 	print(Fore.YELLOW + """
 	   Glissez vos fichiers à partager dans le dossier partage...""")
 	sleep(2)
