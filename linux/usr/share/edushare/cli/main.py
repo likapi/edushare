@@ -1,283 +1,37 @@
-#!/usr/bin/python3
-import colorama, datetime, pyfiglet, socket, os, zipfile, http.server, socketserver, webbrowser, requests
-from os import system, name
-from sys import platform as _platform
-from time import sleep
-from pyfiglet import Figlet
-from colorama import Fore, Back, Style
-from bs4 import BeautifulSoup
-from pyngrok import ngrok, conf
+#!/usr/bin/env python3 
+# -*- coding: utf-8 -*-"
 
-#config
-colorama.init() #colorama init
-font = Figlet(font='graffiti') #pyfiglet font
-now = datetime.datetime.now() #datetime get time
-#ngrok conf persistent
-try:
-	with open("/usr/share/edushare/cli/lang.txt"):
-		regconf = open("/usr/share/edushare/cli/lang.txt", "r")
-		conf.get_default().region = regconf.read()
-		regconf.close()
-except IOError:
-	conf.get_default().region = None #ngrok default region
+"""
+- Licence: Likapi Education
+- Name: EduShare
+- Version: 1.0
+"""
 
-try:
-	with open("/usr/share/edushare/cli/token.txt"):
-		authconf = open("/usr/share/edushare/cli/token.txt", "r")
-		conf.get_default().auth_token = authconf.read()
-		authconf.close()
-except IOError:
-	conf.get_default().auth_token = None #ngrok default authtoken
+#import librairies
+import os, sys
+from gui import *
+from conf import *
 
-def sys():
-	if _platform == "linux" or _platform == "linux2":
+#verify if this is a linux
+def verifySys():
+	if sys.platform == "linux" or sys.platform == "linux2":
 		main()
-	elif _platform == "darwin":
-		print(Fore.GREEN + """
+	elif sys.platform == "darwin":
+		print(GREEN + """
 	Mac Os détecté, vous devez utiliser linux...
 		""")
 		close()
-	elif _platform == "win32" or _platform == "win64":
-		print(Fore.GREEN + """
+	elif sys.platform == "win32" or sys.platform == "win64":
+		print(GREEN + """
 	Windows détecté, vous devez utiliser linux...
 		""")
 		close()
 	else:
-		print(Fore.GREEN + """
+		print(GREEN + """
 	Impossible d'identifier le système d'exploitation...
 		""")
 		close()
 
-def banner():
-	banner = font.renderText("        EduShare")
-	print(Fore.RED + banner + """
-		--- """,module_name,""" ---""")
-	print(Fore.CYAN + """
-	 Github: https://github.com/likapi
-	  Documentation: https://likapi.github.io/docs""" + Fore.MAGENTA + """
-	   Instagram: @likapi.sh - Twitter: @likapi_sh
-	 """)
-
-def main():
-	socket.socket().setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-	global module_name
-	module_name = "Développé par Keany Vy KHUN"
-	banner()
-	print(Fore.YELLOW + """
-     [1]. Partage     [2]. Réception     [3]. Compression
-     [4]. Tunnels     [5]. Région        [6]. AuthToken
-     [7]. Historique  [8]. Aide          [0]. Quitter
-		""")
-	menu = input(Fore.WHITE + str("""
-	  Entrez un numéro : """))
-	if menu != "":
-		if menu == "0":
-			close()
-		elif menu == "1":
-			clear()
-			send()
-		elif menu == "2":
-			clear()
-			receive()
-		elif menu == "3":
-			clear()
-			compress()
-		elif menu == "4":
-			clear()
-			tunnels()
-		elif menu == "5":
-			clear()
-			region()
-		elif menu == "6":
-			clear()
-			authtoken()
-		else:
-			print(Fore.GREEN + """
-	  Nombre invalide
-			""")
-			sleep(2)
-			clear()
-			main()
-
-def send():
-	ngrok.get_ngrok_process().stop_monitor_thread()
-	global module_name
-	module_name = "Partage de fichiers (Socket)"
-	banner()
-	if not os.path.exists("/usr/share/edushare/cli/partage"):
- 		os.makedirs("/usr/share/edushare/cli/partage")
- 		os.chmod("/usr/share/edushare/cli/partage", 0o0777)
-	print(Fore.YELLOW + """
-	   Glissez vos fichiers à partager dans le dossier partage...""")
-	sleep(2)
-	webbrowser.open('/usr/share/edushare/cli/partage')
-	port = 8080
-	web_dir = os.path.join(os.path.dirname(__file__), '/usr/share/edushare/cli/partage')
-	os.chdir(web_dir)
-	http_tunnel = ngrok.connect(port, bind_tls=True).public_url
-	address = ("0.0.0.0", port)
-	handler = http.server.SimpleHTTPRequestHandler
-	httpd = socketserver.TCPServer(address, handler)
-	print(Fore.GREEN + f"""
-	   Votre url de partage : {http_tunnel}
-	    Est en attente de connexion d'un récepteur...
-	""" + Fore.YELLOW)
-	httpd.serve_forever()
-
-def receive():
-	global module_name
-	module_name = "Réception de fichiers (Socket)"
-	banner()
-	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-	host = input(Fore.WHITE + str("""
-	  Entrez l'url de partage : """))
-	port = 8080
-	if "ngrok.io" in host:
-		print(Fore.GREEN + f"""
-	   Vous êtes connecté à {host}...
-		""")
-		sleep(2)
-		webbrowser.open(host)
-		exit()
-	else:
-		print(Fore.RED + """
-	   Url de partage invalide...
-		""")
-		sleep(2)
-		clear()
-		receive()
-
-def tunnels():
-	global module_name
-	module_name = "Liste des tunnels actifs (Ngrok)"
-	banner()
-	print(Fore.GREEN + f"""
-	   {ngrok.get_ngrok_process()}
-	""")
-
-def region():
-	global module_name
-	module_name = "Région par défaut (Ngrok)"
-	banner()
-	if conf.get_default().region != None:
-		print(Fore.YELLOW + f"""
-	   Région par défaut : {conf.get_default().region}
-	   """)
-	conf.get_default().region = input(Fore.WHITE + str("""
-	  Entrez une région (ISO-3166) : """))
-	if conf.get_default().region != "":
-		reg = open("/usr/share/edushare/cli/lang.txt", "w")
-		reg.write(conf.get_default().region)
-		reg.close()
-		print(Fore.GREEN + f"""
-	   La langue {conf.get_default().region} a été définie avec succès
-		""")
-		exit()
-	else:
-		conf.get_default().region = None
-		print(Fore.RED + """
-	   Entrez une valeur pour l'AuthToken...
-		""")
-		sleep(2)
-		clear()
-		region()
-
-def compress():
-	global module_name
-	module_name = "Compression de fichiers (Zip)"
-	banner()
-	filezip = input(Fore.WHITE + str("""
-	  Entrez le nom du fichier zip : """))
-	if ".zip" in filezip:
-		zip = zipfile.ZipFile(filezip, 'w')
-		filename = input(Fore.WHITE + str("""
-	  Entrez le chemin des fichiers à compresser : """))
-		try:
-			zip.write(filename)
-			zip.close()
-			print(Fore.GREEN + f"""
-	   Compression des fichiers avec succès
-	   		""")
-		except:
-			print(Fore.RED + f"""
-	   Le fichier {filename} est introuvable...
-        	""")
-			sleep(2)
-			zip.close()
-			os.remove(filezip)
-			clear()
-			compress()
-	else:
-		filezip = str(f"{filezip}.zip")
-		zip = zipfile.ZipFile(filezip, 'w')
-		filename = input(Fore.WHITE + str("""
-	  Entrez le chemin des fichiers à compresser : """))
-		try:
-			zip.write(filename)
-			zip.close()
-			print(Fore.GREEN + f"""
-	   Compression des fichiers avec succès
-	   		""")
-		except:
-			print(Fore.RED + f"""
-	   Le fichier {filename} est introuvable...
-        	""")
-			sleep(2)
-			zip.close()
-			os.remove(filezip)
-			clear()
-			compress()
-
-def authtoken():
-	global module_name
-	module_name = "AuthToken par défaut (Ngrok)"
-	banner()
-	print(Fore.YELLOW + """
-	   AuthToken sur : https://dashboard.ngrok.com/signup
-	""")
-	if conf.get_default().auth_token != None:
-		print(Fore.YELLOW + f"""
-	   AuthToken par défaut : {conf.get_default().auth_token}
-	   """)
-	conf.get_default().auth_token = input(Fore.WHITE + str("""
-	  Entrez un nouveau AuthToken : """))
-	if conf.get_default().auth_token != "":
-		auth = open("/usr/share/edushare/cli/token.txt", "w")
-		auth.write(conf.get_default().auth_token)
-		auth.close()
-		print(Fore.GREEN + f"""
-	   L'AuthToken {conf.get_default().auth_token} a été défini avec succès
-		""")
-		exit()
-	else:
-		conf.get_default().auth_token = None
-		print(Fore.RED + f"""
-	   Entrez une valeur pour l'AuthToken...
-		""")
-		sleep(2)
-		clear()
-		authtoken()
-
-def coming():
-	print(Fore.GREEN + """
-	   Bientôt disponible...
-	 """)
-	sleep(2)
-	clear()
-	main()
-
-
-def close():
-	print(Fore.GREEN + """
-	   Fermeture du client EduShare...
-		""")
-	exit()
-
-def clear():
-	#clear la console
-	_ = system('clear')
-
+#start program
 if __name__ == "__main__":
-	clear()
-	sys()
+	verifySys()
