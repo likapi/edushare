@@ -1,7 +1,10 @@
-import os
+import os, datetime
 from pyngrok import ngrok, conf
+from colors import *
 
-path = "/usr/share/edushare/cli/"
+#config
+now = datetime.datetime.now() #datetime get time
+path = "/opt/edushare/cli/"
 
 def ngrokverify():
 	#ngrok conf persistent

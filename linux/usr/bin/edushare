@@ -1,7 +1,7 @@
 #!/bin/bash
 
-cli="/usr/share/edushare/"
-depvalid="/usr/share/edushare/config/valid-dep.txt"
+cli="/opt/edushare/"
+depvalid="/opt/edushare/config/valid-dep.txt"
 
 if [ -e $cli"config/valid-dep.txt" ]
 then
